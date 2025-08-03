@@ -11,16 +11,6 @@ from datetime import datetime
 
 from config import API_HASH, APP_ID, LOGGER, TG_BOT_TOKEN, TG_BOT_WORKERS, FORCE_SUB_CHANNEL, CHANNEL_ID, PORT
 
-
-ascii_art = """
-░█████╗░░█████╗░██████╗░███████╗██╗░░██╗██████╗░░█████╗░████████╗███████╗
-██╔══██╗██╔══██╗██╔══██╗██╔════╝╚██╗██╔╝██╔══██╗██╔══██╗╚══██╔══╝╚════██║
-██║░░╚═╝██║░░██║██║░░██║█████╗░░░╚███╔╝░██████╦╝██║░░██║░░░██║░░░░░███╔═╝
-██║░░██╗██║░░██║██║░░██║██╔══╝░░░██╔██╗░██╔══██╗██║░░██║░░░██║░░░██╔══╝░░
-╚█████╔╝╚█████╔╝██████╔╝███████╗██╔╝╚██╗██████╦╝╚█████╔╝░░░██║░░░███████╗
-░╚════╝░░╚════╝░╚═════╝░╚══════╝╚═╝░░╚═╝╚═════╝░░╚════╝░░░░╚═╝░░░╚══════╝
-"""
-
 class Bot(Client):
     def __init__(self):
         super().__init__(
@@ -67,7 +57,7 @@ class Bot(Client):
         self.set_parse_mode(ParseMode.HTML)
         self.LOGGER(__name__).info(f"Bot Running..!\n\nCreated by \nhttps://t.me/CodeXBotz")
         print(ascii_art)
-        print("""Welcome to CodeXBotz File Sharing Bot""")
+        print("""Welcome to ExhoFlex TV File Sharing Bot""")
         self.username = usr_bot_me.username
         #web-response
         app = web.AppRunner(await web_server())
@@ -78,3 +68,24 @@ class Bot(Client):
     async def stop(self, *args):
         await super().stop()
         self.LOGGER(__name__).info("Bot stopped.")
+
+if __name__ == "__main__":
+    import uvicorn
+    from fastapi import FastAPI, Request
+    from pyrogram import Client
+
+    app = FastAPI()
+    bot = Client("bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+
+    @app.on_event("startup")
+    async def start_bot():
+        await bot.start()
+        await bot.set_webhook("https://your-koyeb-app.koyeb.app/")
+
+    @app.post("/")
+    async def telegram_webhook(req: Request):
+        update = await req.json()
+        await bot.process_update(update)
+        return {"ok": True}
+
+    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
